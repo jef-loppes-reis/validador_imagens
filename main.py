@@ -20,7 +20,9 @@ class ValidadorImagem:
         'foto_verificada',
         'marca_dagua',
         'texto',
-        'fundo_branco'
+        'fundo_branco',
+        'logo',
+        'carro'
     ]
 
     __extencoes: tuple[str] = (
@@ -42,6 +44,15 @@ class ValidadorImagem:
     # Criando um rótulo para a imagem
     __label_imagem: ctk.CTkLabel = ctk.CTkLabel(__root)
     __label_imagem.pack(pady=10)
+
+    # Criando um rotulo para texto
+    __label_mensagem: ctk.CTkLabel = ctk.CTkLabel(
+        __root,
+        text='"Selecionar caso a foto tenha os seguintes problemas:"',
+        font=('Arial', 16),
+        anchor='se'
+    )
+    __label_mensagem.pack(padx=200, anchor='se')
 
     # Botões "Sim" e "Não"
     __frame_botoes = ctk.CTkFrame(__root)
@@ -104,6 +115,8 @@ class ValidadorImagem:
         self.__df_default['marca_dagua'] = False
         self.__df_default['texto'] = False
         self.__df_default['fundo_branco'] = False
+        self.__df_default['logo'] = False
+        self.__df_default['carro'] = False
 
         self.__df_default.loc[:, 'extensao_valida'] = (
             self.__df_default['nome_arquivo_foto'].str.endswith(
@@ -156,6 +169,12 @@ class ValidadorImagem:
         self.__index_label.configure(
             text=f"Índice: {self.__index_config.get('indice_atual')} de {self.__index_config.get('indice_maximo')}"
         )
+
+    # def __mostrar_texto_informativo(self):
+    #     self.__label_mensagem.configure(
+    #         text='"Selecionar caso a foto tenha os seguintes problemas:"'
+
+    #     )
 
     def __menssagem_index_error(self, msg: str):
         CTkMessagebox(
@@ -220,7 +239,8 @@ class ValidadorImagem:
                 'indice_atual'), 'pegar_foto'] = not any(
                     [self.__marca_dagua,
                      self.__texto_img,
-                     self.__fundo_branco]
+                     self.__fundo_branco,
+                     self.__logo]
                 )
 
             self.__df_copy.loc[self.__index_config.get(
@@ -232,23 +252,48 @@ class ValidadorImagem:
             self.__df_copy.loc[self.__index_config.get(
                 'indice_atual'), 'fundo_branco'] = self.__texto_img
 
+            self.__df_conferencia.loc[self.__index_config.get(
+                'indice_atual'), 'logo'] = self.__logo
+
+            self.__df_conferencia.loc[self.__index_config.get(
+                'indice_atual'), 'carro'] = self.__carro
+
             self.__save_data()
             self.__alternar_indice(avancar=True)
             self.__mostrar_imagem()
             self.__mostrar_indices()
+            # Muda os status de todas os atributos para FALSO.
             self.__mudar_status_marca_dagua(False)
             self.__mudar_status_texto_img(False)
+            self.__mudar_status_fundo_branco(False)
+            self.__mudar_status_logo(False)
+            self.__mudar_status_carro(False)
             return
 
         if voltar:
             if self.__index_config.get('indice_atual') > 0:
                 self.__alternar_indice(avancar=False)
+                # Muda os status de todas os atributos para FALSO.
                 self.__mudar_status_marca_dagua(False)
                 self.__mudar_status_texto_img(False)
-                self.__df_copy.loc[self.__index_config.get('indice_atual'), 'foto_verificada'] = False
-                self.__df_copy.loc[self.__index_config.get('indice_atual'), 'pegar_foto'] = False
-                self.__df_copy.loc[self.__index_config.get('indice_atual'), 'marca_dagua'] = self.__marca_dagua
-                self.__df_copy.loc[self.__index_config.get('indice_atual'), 'texto_na_foto'] = self.__texto_img
+                self.__mudar_status_fundo_branco(False)
+                self.__mudar_status_logo(False)
+                self.__mudar_status_carro(False)
+                # Fluxo de indice
+                self.__df_copy.loc[self.__index_config.get('indice_atual'),
+                                   'foto_verificada'] = False
+                self.__df_copy.loc[self.__index_config.get('indice_atual'),
+                                   'pegar_foto'] = False
+                self.__df_copy.loc[self.__index_config.get('indice_atual'),
+                                   'marca_dagua'] = self.__marca_dagua
+                self.__df_copy.loc[self.__index_config.get('indice_atual'),
+                                   'texto_na_foto'] = self.__texto_img
+                self.__df_copy.loc[self.__index_config.get('indice_atual'),
+                                   'fundo_branco'] = self.__texto_img
+                self.__df_copy.loc[self.__index_config.get('indice_atual'),
+                                   'logo'] = self.__texto_img
+                self.__df_copy.loc[self.__index_config.get('indice_atual'),
+                                   'carro'] = self.__texto_img
                 self.__save_data()
                 self.__mostrar_imagem()
                 self.__mostrar_indices()
@@ -268,8 +313,8 @@ class ValidadorImagem:
 
         botao_proxima_foto = CTkButton(
             self.__frame_botoes,
-            text='Proxima Foto',
-            # bg='green',
+            text='Proxima',
+            fg_color='green',
             command=lambda: self.__janela(
                 proxima_foto=True,
                 voltar=False
@@ -280,6 +325,8 @@ class ValidadorImagem:
         botao_foto_anterior = CTkButton(
             self.__frame_botoes,
             text='Anterior',
+            fg_color='yellow',
+            text_color='black',
             command=lambda: self.__janela(
                 proxima_foto=False,
                 voltar=True
@@ -331,10 +378,21 @@ class ValidadorImagem:
         )
         botao_foto_logo.pack(side='bottom', padx=5, pady=5)
 
+        botao_foto_logo = CTkButton(
+            self.__frame_botoes,
+            text="Carro",
+            command=lambda: self.__janela(
+                proxima_foto=False,
+                voltar=False,
+                carro=True
+            )
+        )
+        botao_foto_logo.pack(side='bottom', padx=5, pady=5)
+
         self.__root.mainloop()
 
 if __name__ == '__main__':
-    DIRETORIO_FOTOS: str = 'C:/Users/Jeff/wk-python/validador_imagens/img/takao'
+    DIRETORIO_FOTOS: str = './img/takao'
     DIRETORIO_DATAFRAME: str = ''
     validador: ValidadorImagem = ValidadorImagem(DIRETORIO_FOTOS, 'takao')
     validador.created_data_frame()
