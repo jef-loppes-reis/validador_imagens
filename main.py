@@ -124,8 +124,8 @@ class ValidadorImagem:
             self.__df_default['nome_arquivo_foto'].str.endswith(
                 self.__extencoes)
         )
-        self.__df_default.to_feather(f'./temp/conferencia_fotos_{self._fabricante}.feather')
-        self.__df_default.to_csv(f'./temp/conferencia_fotos_{self._fabricante}.csv', index=False)
+        self.__df_default.iloc[4250:,:].to_feather(f'./temp/conferencia_fotos_{self._fabricante}.feather')
+        self.__df_default.iloc[4250:,:].to_csv(f'./temp/conferencia_fotos_{self._fabricante}.csv', index=False)
         rprint(self.__df_default)
 
     def ler_dataframe(self):
@@ -246,7 +246,7 @@ class ValidadorImagem:
                 'indice_atual'), 'texto'] = self.__texto_img
 
             self.__df_copy.loc[self.__index_config.get(
-                'indice_atual'), 'fundo_neutro'] = self.__texto_img
+                'indice_atual'), 'fundo_neutro'] = self.__fundo_neutro
 
             self.__df_copy.loc[self.__index_config.get(
                 'indice_atual'), 'logo'] = self.__logo
@@ -402,6 +402,6 @@ if __name__ == '__main__':
     DIRETORIO_FOTOS: str = 'C:/Users/jeferson.lopes/ownCloud - Jeferson Lopes@cloud.pecista.com.br/takao'
     DIRETORIO_DATAFRAME: str = ''
     validador: ValidadorImagem = ValidadorImagem(DIRETORIO_FOTOS, 'takao')
-    validador.created_data_frame()
+    # validador.created_data_frame()
     validador.ler_dataframe()
     validador.main()
